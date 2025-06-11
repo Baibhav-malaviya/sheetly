@@ -115,16 +115,19 @@ export const authOptions: NextAuthOptions = {
 		async createUser({ user }) {
 			await connectDB;
 
-			const existingUser = await User.findOne({ email: user.email });
-			if (existingUser) return; // user already created by adapter
+			console.log("user in createUser event: ", user);
 
-			// Optionally update fields if missing
-			await User.updateOne(
-				{ email: user.email },
+			// Patch the auto-created OAuth user to your full schema
+			await User.findOneAndUpdate(
+				{ _id: user.id },
 				{
-					$setOnInsert: {
+					$set: {
+						username:
+							user.name?.toLowerCase().replace(/\s+/g, "_") ||
+							"user_" + Date.now(),
+						emailVerified: new Date(),
 						profile: {
-							name: user.name || "",
+							name: user.name || "User",
 							avatar: user.image || "",
 							timezone: "UTC",
 							preferences: {
@@ -142,9 +145,11 @@ export const authOptions: NextAuthOptions = {
 						},
 						publicProfile: {},
 						lastLogin: new Date(),
+						createdAt: new Date(),
+						updatedAt: new Date(),
 					},
 				},
-				{ upsert: true }
+				{ new: true }
 			);
 		},
 	},
