@@ -98,10 +98,6 @@ const UserSchema = new Schema<UserDocument>(
 	{ timestamps: true }
 );
 
-// Basic indexes
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
-
 // Basic methods
 UserSchema.methods.updateLastLogin = function () {
 	this.lastLogin = new Date();
