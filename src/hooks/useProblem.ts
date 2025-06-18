@@ -6,7 +6,7 @@ import {
 	updateProblem,
 	deleteProblem,
 } from "@/lib/api/problems";
-import { IProblem as Problem } from "@/types/problem";
+import { IProblem as Problem } from "@/types/problem.type";
 
 export const useProblem = () => {
 	const [problems, setProblems] = useState<Problem[]>([]);

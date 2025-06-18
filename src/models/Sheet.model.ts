@@ -1,74 +1,49 @@
-// Simplified Sheet model with essential methods, virtuals, and statics retained
-import mongoose, { Schema, Types, Document, Model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import {
+	ISheetDocument,
+	ISheetModel,
+	SheetCategory,
+	SheetDifficulty,
+	ProblemStatus,
+	ISheetProblem,
+	IGoals,
+} from "@/types/sheet.type";
 
-// Enums
-export enum SheetCategory {
-	PERSONAL = "Personal",
-	TEMPLATE = "Template",
-	STUDY = "Study",
-	OTHER = "Other",
-}
+// Schema
+const sheetProblemSchema = new Schema<ISheetProblem>(
+	{
+		problemId: {
+			type: Schema.Types.ObjectId,
+			ref: "MasterProblem",
+			required: true,
+		},
+		order: Number,
+		addedAt: { type: Date, default: Date.now },
 
-export enum SheetDifficulty {
-	EASY = "Easy",
-	MEDIUM = "Medium",
-	HARD = "Hard",
-}
-
-// Interfaces
-export interface IGoals {
-	dailyTarget?: number;
-	completionDeadline?: Date;
-}
-
-export interface IPreferences {
-	showDifficulty: boolean;
-}
-
-export interface ISettings {
-	goals: IGoals;
-	preferences: IPreferences;
-}
-
-export interface ISocial {
-	upvotes: number;
-	downvotes: number;
-	views: number;
-	score: number;
-}
-
-export interface ISheet {
-	userId: Types.ObjectId;
-	name: string;
-	category: SheetCategory;
-	isTemplate: boolean;
-	isPublic: boolean;
-	settings: ISettings;
-	social: ISocial;
-	tags: string[];
-	difficulty: SheetDifficulty;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-export interface ISheetDocument extends ISheet, Document {
-	popularityScore: number;
-	isDeadlineApproaching: boolean;
-
-	incrementViews(): Promise<ISheetDocument>;
-	addUpvote(): Promise<ISheetDocument>;
-	updateGoals(goals: Partial<IGoals>): Promise<ISheetDocument>;
-}
-
-export interface ISheetModel extends Model<ISheetDocument> {
-	findPopular(limit?: number): Promise<ISheetDocument[]>;
-	getTrendingTags(limit?: number): Promise<{ _id: string; count: number }[]>;
-}
+		status: {
+			type: String,
+			enum: Object.values(ProblemStatus),
+			default: ProblemStatus.NOT_STARTED,
+		},
+		completed: { type: Boolean, default: false },
+		completedAt: Date,
+		timeSpent: { type: Number, default: 0 },
+		attempts: { type: Number, default: 0 },
+		personalRating: Number,
+		notes: String,
+		approaches: [String],
+		firstAttemptDate: Date,
+		lastAttemptDate: Date,
+		bookmarked: { type: Boolean, default: false },
+	},
+	{ _id: false }
+);
 
 const sheetSchema = new Schema<ISheetDocument>(
 	{
 		userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 		name: { type: String, required: true },
+		description: String,
 		category: {
 			type: String,
 			enum: Object.values(SheetCategory),
@@ -76,13 +51,17 @@ const sheetSchema = new Schema<ISheetDocument>(
 		},
 		isTemplate: { type: Boolean, default: false },
 		isPublic: { type: Boolean, default: false },
+		problems: [sheetProblemSchema],
 		settings: {
 			goals: {
-				dailyTarget: { type: Number, min: 0 },
-				completionDeadline: { type: Date },
+				dailyTarget: Number,
+				weeklyHours: Number,
+				completionDeadline: Date,
 			},
 			preferences: {
 				showDifficulty: { type: Boolean, default: true },
+				showTime: { type: Boolean, default: true },
+				showNotes: { type: Boolean, default: true },
 			},
 		},
 		social: {
@@ -90,6 +69,8 @@ const sheetSchema = new Schema<ISheetDocument>(
 			downvotes: { type: Number, default: 0 },
 			views: { type: Number, default: 0 },
 			score: { type: Number, default: 0 },
+			comments: { type: Number, default: 0 },
+			usedAsTemplate: { type: Number, default: 0 },
 		},
 		tags: [{ type: String, trim: true, lowercase: true }],
 		difficulty: {
@@ -113,38 +94,42 @@ sheetSchema.virtual("popularityScore").get(function (this: ISheetDocument) {
 sheetSchema
 	.virtual("isDeadlineApproaching")
 	.get(function (this: ISheetDocument) {
-		if (!this.settings.goals.completionDeadline) return false;
-		const diff =
-			(this.settings.goals.completionDeadline.getTime() - Date.now()) /
-			(1000 * 60 * 60 * 24);
-		return diff <= 7 && diff > 0;
+		const deadline = this.settings.goals?.completionDeadline;
+		if (!deadline) return false;
+		const daysLeft = (deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+		return daysLeft <= 7 && daysLeft > 0;
 	});
 
-// Methods
+// Private helper
+sheetSchema.methods._recalculateScore = function (this: ISheetDocument) {
+	this.social.score = this.social.upvotes - this.social.downvotes;
+};
+
+// Instance Methods
 sheetSchema.methods.incrementViews = function () {
 	this.social.views++;
 	return this.save();
 };
 
-sheetSchema.methods.addUpvote = function (): Promise<ISheetDocument> {
+sheetSchema.methods.addUpvote = function () {
 	this.social.upvotes += 1;
 	this._recalculateScore();
 	return this.save();
 };
 
-sheetSchema.methods.removeUpvote = function (): Promise<ISheetDocument> {
+sheetSchema.methods.removeUpvote = function () {
 	this.social.upvotes = Math.max(0, this.social.upvotes - 1);
 	this._recalculateScore();
 	return this.save();
 };
 
-sheetSchema.methods.addDownvote = function (): Promise<ISheetDocument> {
+sheetSchema.methods.addDownvote = function () {
 	this.social.downvotes += 1;
 	this._recalculateScore();
 	return this.save();
 };
 
-sheetSchema.methods.removeDownvote = function (): Promise<ISheetDocument> {
+sheetSchema.methods.removeDownvote = function () {
 	this.social.downvotes = Math.max(0, this.social.downvotes - 1);
 	this._recalculateScore();
 	return this.save();
@@ -172,13 +157,14 @@ sheetSchema.statics.getTrendingTags = function (limit = 5) {
 	]);
 };
 
-// Middleware
+// Pre-save middleware
 sheetSchema.pre("save", function (next) {
-	this.tags = [...new Set(this.tags.map((tag) => tag.toLowerCase()))];
-	this.social.score = this.social.upvotes - this.social.downvotes;
+	this.tags = [...new Set(this.tags.map((tag) => tag.toLowerCase().trim()))];
+	this._recalculateScore();
 	next();
 });
 
-const Sheet = mongoose.model<ISheetDocument, ISheetModel>("Sheet", sheetSchema);
-
+const Sheet =
+	(mongoose.models.Sheet as ISheetModel) ||
+	mongoose.model<ISheetDocument, ISheetModel>("Sheet", sheetSchema);
 export default Sheet;

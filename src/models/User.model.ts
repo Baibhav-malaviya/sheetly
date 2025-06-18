@@ -1,5 +1,5 @@
 // models/User.ts
-import mongoose, { Schema, Document, model, models } from "mongoose";
+import { Schema, Document, model, models } from "mongoose";
 
 export interface UserDocument extends Document {
 	// Core authentication fields (Required for NextAuth)

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useProblem } from "@/hooks/useProblem";
-import type { IProblem as Problem } from "@/types/problem";
+import type { IProblem as Problem } from "@/types/problem.type";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

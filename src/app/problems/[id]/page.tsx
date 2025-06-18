@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useProblem } from "@/hooks/useProblem";
-import type { IProblem } from "@/types/problem";
+import type { IProblem } from "@/types/problem.type";
 import { Button } from "@/components/ui/button";
 import {
 	Card,

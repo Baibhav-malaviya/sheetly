@@ -1,4 +1,4 @@
-import type { IProblem as Problem } from "@/types/problem";
+import type { IProblem as Problem } from "@/types/problem.type";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";

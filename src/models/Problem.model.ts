@@ -1,6 +1,7 @@
 // models/Problem.ts
-import mongoose, { Schema, Document, Model } from "mongoose";
-import { IProblem } from "@/types/problem";
+import { Schema, Model, models } from "mongoose";
+import { IProblem } from "@/types/problem.type";
+import { model } from "mongoose";
 
 // Schema definition
 const ProblemSchema = new Schema<IProblem>(
@@ -141,6 +142,6 @@ ProblemSchema.pre("save", function (next) {
 
 // Create and export the model
 const Problem: Model<IProblem> =
-	mongoose.models.Problem || mongoose.model<IProblem>("Problem", ProblemSchema);
+	models.Problem || model<IProblem>("Problem", ProblemSchema);
 
 export default Problem;

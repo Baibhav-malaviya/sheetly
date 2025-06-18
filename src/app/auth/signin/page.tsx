@@ -138,7 +138,7 @@ export default function SignIn() {
 
 					<div className="text-center text-sm">
 						<span className="text-muted-foreground">
-							Don't have an account?{" "}
+							Don&apos;t have an account?{" "}
 						</span>
 						<Button
 							variant="link"

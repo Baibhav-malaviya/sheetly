@@ -1,4 +1,4 @@
-import { IProblem as Problem } from "@/types/problem";
+import { IProblem as Problem } from "@/types/problem.type";
 
 const API_BASE = "/api/problem";
 
