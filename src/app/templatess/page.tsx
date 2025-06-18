@@ -35,9 +35,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ErrorState, { NetworkError, ServerError } from "@/components/ErrorState";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function TemplatesPage() {
 	const { templates, loading, error } = useTemplates();
+	const { isAdmin } = useAuth();
+
 	const [searchTerm, setSearchTerm] = useState("");
 	const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -202,12 +205,14 @@ export default function TemplatesPage() {
 								Discover curated problem sets to enhance your coding skills
 							</p>
 						</div>
-						<Link href="/templatess/create">
-							<Button size="lg" className="gap-2">
-								<PlusCircle className="h-5 w-5" />
-								Create Template
-							</Button>
-						</Link>
+						{isAdmin && (
+							<Link href="/templatess/create">
+								<Button size="lg" className="gap-2">
+									<PlusCircle className="h-5 w-5" />
+									Create Template
+								</Button>
+							</Link>
+						)}
 					</div>
 				</div>
 

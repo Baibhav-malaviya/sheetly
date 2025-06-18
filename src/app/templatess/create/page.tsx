@@ -5,12 +5,24 @@ import ProblemSelector from "@/components/templatess/ProblemSelector";
 import TemplateForm from "@/components/templatess/TemplateForm";
 import { useProblem } from "@/hooks/useProblem";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Plus, ArrowRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { FileText, Plus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { UnauthorizedError } from "@/components/ErrorState";
 
 export default function CreateTemplatePage() {
+	const { session, isAdmin } = useAuth();
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
 	const { problems } = useProblem();
+
+	if (!session) return <UnauthorizedError />;
+
+	if (!isAdmin)
+		return (
+			<UnauthorizedError
+				title="Access Denied"
+				message="You need to to be admin to access this resource."
+			/>
+		);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
