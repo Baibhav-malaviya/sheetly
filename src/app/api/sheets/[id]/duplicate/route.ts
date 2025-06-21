@@ -47,7 +47,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 		const duplicateSheet = new Sheet({
 			...rest,
 			userId: session.user.id,
-			title: `${originalSheet.name} (Copy)`,
+			name: `${originalSheet.name} (Copy)`,
 			social: {
 				upvotes: 0,
 				downvotes: 0,

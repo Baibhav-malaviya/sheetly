@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-	Sheet,
 	fetchUserSheets,
 	createSheet,
 	updateSheet,
@@ -11,8 +10,10 @@ import {
 	fetchSheet,
 } from "@/lib/api/sheets";
 
+import { ISheetDocument } from "@/types/sheet.type";
+
 export function useSheets() {
-	const [sheets, setSheets] = useState<Sheet[]>([]);
+	const [sheets, setSheets] = useState<ISheetDocument[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -47,8 +48,11 @@ export function useSheets() {
 	const editSheet = async (id: string, updates: UpdateSheetData) => {
 		try {
 			const updatedSheet = await updateSheet(id, updates);
+			console.log("updatedSheet", updateSheet);
 			setSheets((prev) =>
-				prev.map((sheet) => (sheet._id === id ? updatedSheet : sheet))
+				prev.map((sheet) =>
+					sheet._id.toString() === id ? updatedSheet : sheet
+				)
 			);
 			return updatedSheet;
 		} catch (err) {
@@ -60,7 +64,9 @@ export function useSheets() {
 	const removeSheet = async (id: string) => {
 		try {
 			await deleteSheet(id);
-			setSheets((prev) => prev.filter((sheet) => sheet._id !== id));
+			setSheets((prev) =>
+				prev.filter((sheet) => sheet._id.toString() !== id.toString())
+			);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to delete sheet");
 			throw err;
@@ -70,6 +76,7 @@ export function useSheets() {
 	const copySheet = async (id: string) => {
 		try {
 			const duplicatedSheet = await duplicateSheet(id);
+			// Optional: fetch full sheet if needed
 			setSheets((prev) => [duplicatedSheet, ...prev]);
 			return duplicatedSheet;
 		} catch (err) {
@@ -93,7 +100,7 @@ export function useSheets() {
 }
 
 export function useSheet(id: string) {
-	const [sheet, setSheet] = useState<Sheet | null>(null);
+	const [sheet, setSheet] = useState<ISheetDocument | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -120,7 +127,7 @@ export function useSheet(id: string) {
 		if (!sheet) return;
 
 		try {
-			const updatedSheet = await updateSheet(sheet._id, updates);
+			const updatedSheet = await updateSheet(id, updates);
 			setSheet(updatedSheet);
 			return updatedSheet;
 		} catch (err) {

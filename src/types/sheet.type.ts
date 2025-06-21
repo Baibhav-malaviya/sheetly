@@ -23,7 +23,7 @@ export enum ProblemStatus {
 
 // Interfaces
 export interface ISheetProblem {
-	problemId: Types.ObjectId;
+	problemId: Types.ObjectId | string;
 	order: number;
 	addedAt: Date;
 
@@ -83,6 +83,7 @@ export interface ISheet {
 }
 
 export interface ISheetDocument extends ISheet, Document {
+	_id: Types.ObjectId; // ✅ Explicitly define _id type
 	popularityScore: number;
 	isDeadlineApproaching: boolean;
 

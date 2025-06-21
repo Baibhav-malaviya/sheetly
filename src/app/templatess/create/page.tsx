@@ -43,53 +43,6 @@ export default function CreateTemplatePage() {
 					</p>
 				</div>
 
-				{/* Progress Indicator
-				<Card className="mb-8">
-					<CardContent className="p-4">
-						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-4">
-								<div className="flex items-center gap-2">
-									<div
-										className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-											selectedIds.length > 0
-												? "bg-primary text-primary-foreground"
-												: "bg-muted text-muted-foreground"
-										}`}
-									>
-										1
-									</div>
-									<span className="font-medium">Select Problems</span>
-									{selectedIds.length > 0 && (
-										<Badge variant="secondary">
-											{selectedIds.length} selected
-										</Badge>
-									)}
-								</div>
-
-								<ArrowRight className="h-4 w-4 text-muted-foreground" />
-
-								<div className="flex items-center gap-2">
-									<div
-										className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-											selectedIds.length > 0
-												? "bg-primary text-primary-foreground"
-												: "bg-muted text-muted-foreground"
-										}`}
-									>
-										2
-									</div>
-									<span className="font-medium">Configure Template</span>
-								</div>
-							</div>
-
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
-								<FileText className="h-4 w-4" />
-								<span>{problems?.length || 0} problems available</span>
-							</div>
-						</div>
-					</CardContent>
-				</Card> */}
-
 				{/* Main Content */}
 				<div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 					{/* Left Column - Problem Selection */}
